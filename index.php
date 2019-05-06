@@ -1,13 +1,7 @@
 <?php
 
 require 'vendor/autoload.php';
-
-$config['displayErrorDetails'] = true;
-$config['addContentLengthHeader'] = false;
-
-$config['mongo']['host']   = 'localhost';
-$config['mongo']['port'] = 27017;
-$config['mongo']['dbname'] = 'test';
+require 'config.php';
 
 $app = new \Slim\App(['settings' => $config]);
 
@@ -23,7 +17,10 @@ $container['logger'] = function($c) {
 
 $app->get('/routine/familly/{name}', function ($request, $response, $args) {
     session_start();
-    $manager = new MongoDB\Driver\Manager("mongodb://localhost:27017");
+    //$manager = new MongoDB\Driver\Manager("mongodb://localhost:27017");
+
+    $this->logger->addInfo($this->get('settings')['mongo']['connectionString']);
+    $manager = new MongoDB\Driver\Manager($this->get('settings')['mongo']['connectionString']);
 
     $query = new MongoDB\Driver\Query(["name" => $args['name']], []);
 
@@ -47,7 +44,7 @@ $app->get('/routine/familly/{name}', function ($request, $response, $args) {
 
 $app->get('/routine/childs', function ($request, $response, $args) {
     session_start();
-    $manager = new MongoDB\Driver\Manager("mongodb://localhost:27017");
+    $manager = new MongoDB\Driver\Manager($this->get('settings')['mongo']['connectionString']);
     
     //$idFamilly = $_SESSION['idFamilly'];
     $idFamilly = 1;
@@ -106,7 +103,7 @@ $app->post('/routine/log/stepComplete', function ($request, $response, $args) {
         "medal" => (int) $medal
     ]);
 
-    $manager = new MongoDB\Driver\Manager("mongodb://localhost:27017");
+    $manager = new MongoDB\Driver\Manager($this->get('settings')['mongo']['connectionString']);
     $result = $manager->executeBulkWrite('test.log', $bulk);
 
     return $response->withStatus(201);
@@ -131,7 +128,7 @@ $app->post('/routine/log/routineComplete', function ($request, $response, $args)
         "medal" => (int) $medal
     ]);
 
-    $manager = new MongoDB\Driver\Manager("mongodb://localhost:27017");
+    $manager = new MongoDB\Driver\Manager($this->get('settings')['mongo']['connectionString']);
     $result = $manager->executeBulkWrite('test.log', $bulk);
 
     return $response->withStatus(201);
@@ -139,7 +136,7 @@ $app->post('/routine/log/routineComplete', function ($request, $response, $args)
 
 $app->get('/routine/routines-list', function ($request, $response, $args) {
     session_start();
-    $manager = new MongoDB\Driver\Manager("mongodb://localhost:27017");
+    $manager = new MongoDB\Driver\Manager($this->get('settings')['mongo']['connectionString']);
     
     //$idFamilly = $_SESSION['idFamilly'];
     $idFamilly = 1;
